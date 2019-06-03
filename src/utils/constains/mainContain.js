@@ -1,0 +1,1 @@
+export const ERROR = 'Đã xảy ra lỗi. Vui lòng thử lại sau!';
