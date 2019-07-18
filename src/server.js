@@ -27,6 +27,7 @@ const connectApolloServer = async () => {
       return { req, res }
     },
     formatError: error => {
+      throw error;
       const message = error.message;
       if (process.env.NODE_ENV == 'production') {
         console.log(error);

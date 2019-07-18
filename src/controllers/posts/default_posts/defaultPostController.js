@@ -1,10 +1,12 @@
-import { defaultPostModel } from '../../../models/defaultPostModel';
+import { mongo } from 'mongoose';
+import { defaultPostModel } from '../../../models/default_post/defaultPostModel';
 //Todo: Utils
 import { uploadImage } from '../../../utils/imageUtil';
 import { asyncClient } from '../../../configs/redisDBConnect';
 import { convertPostTime } from '../../../utils/dateTimeUtil'
 //Todo: Contains
 import { ERROR } from '../../../utils/constains/mainContain';
+import delay from 'delay';
 
 //Todo: Create default post
 export const createDefaultPost = async (defaultPostData, req) => {
@@ -29,12 +31,24 @@ export const createDefaultPost = async (defaultPostData, req) => {
     throw new Error(ERROR)
 }
 //Todo: Get list of default post
-export const getListDefaultPost = async (args, req, res) => {
-    let result = await defaultPostModel
-        .find()
-        .limit(parseInt(process.env.NUMBER_OF_POST_FIRST_TIME_QUERY))
-        .populate('userID', 'profileName avatar')
-        .sort({ _id: -1 });
+export const getListDefaultPost = async (lastPostID) => {
+    //await delay(500)
+    let result;
+    let _lastPostID = mongo.ObjectId(lastPostID);
+    if (_lastPostID) {
+        result = await defaultPostModel
+            .find({ _id: { $lt: _lastPostID } })
+            .limit(parseInt(process.env.NUMBER_OF_POST_FIRST_TIME_QUERY))
+            .populate('userID', 'profileName avatar')
+            .sort({ _id: -1 });
+    }
+    else {
+        result = await defaultPostModel
+            .find()
+            .limit(parseInt(process.env.NUMBER_OF_POST_FIRST_TIME_QUERY))
+            .populate('userID', 'profileName avatar')
+            .sort({ _id: -1 });
+    }
     if (result) return result;
     throw new Error(ERROR)
 }
@@ -98,7 +112,7 @@ export const getListCommentDefaultPost = async ({ postID, skipNumber = 0 }, req)
     }
     let result = await multi.execAsync();
 
-    if(result) return result.reverse();
+    if (result) return result.reverse();
     throw new Error(ERROR);
     // const result = [];
     // for (let commentID of listCommentID) {
@@ -122,21 +136,21 @@ export const commentDefaultPost = async ({ postID, commentContent, commentImage 
     let multi = asyncClient
         .multi()
         .sadd(commentListID, `${commentDate}`)
-        .hset(`${commentID}:${commentDate}`, "userID", userID,"commentID",commentDate, "commentContent", commentContent, "commentImage", commentImageUri, "commentDate", commentDate);
-        let result = await multi.execAsync();
-        if (result[0] === 1 && result[1] === 5) return {
-            postID,
-            commentID:commentDate,
-            commentContent,
-            commentDate,
-            commentImage:commentImageUri,
-            userInfo: {
-                userID,
-                profileName,
-                avatar
-            }
+        .hset(`${commentID}:${commentDate}`, "userID", userID, "commentID", commentDate, "commentContent", commentContent, "commentImage", commentImageUri, "commentDate", commentDate);
+    let result = await multi.execAsync();
+    if (result[0] === 1 && result[1] === 5) return {
+        postID,
+        commentID: commentDate,
+        commentContent,
+        commentDate,
+        commentImage: commentImageUri,
+        userInfo: {
+            userID,
+            profileName,
+            avatar
         }
-        throw new Error(ERROR);
+    }
+    throw new Error(ERROR);
 
 }
 export const getLikeID = (postID) => {

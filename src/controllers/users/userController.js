@@ -1,4 +1,6 @@
+import { mongo } from 'mongoose'
 import { userModel } from '../../models/userModel';
+import { qrCodeModel } from '../../models/qrCodeModel';
 //Todo: Utils
 import { hashPassWordAsync, comparePassWordAsync, signInRespone, genJWT } from '../../utils/authUtil';
 //Todo: Contains
@@ -65,6 +67,25 @@ export const signOut = async (req) => {
     await req.session.destroy();
     return { isSuccess: true }
 }
+//Todo: Tao lenh Sx 
+export const taoLenhSx = async ({ maSx, qrCode }) => {
+    const qrCodeInfo = new qrCodeModel({
+        maSx,
+        qrCode
+    })
+    const result = await qrCodeInfo.save();
+    if (result) return { isSuccess: true };
+    return { isSuccess: false, message: 'SERVER ERROR' };
+}
+export const filterQRCode = async(filterKey) => {
+    const result = qrCodeModel.find({maSx:{$regex: filterKey,$options: 'i'}}).sort( { _id: -1 } ).limit(5);
+    return result;
+}
+export const getQRCodeInfo = async(qrCodeID) => {
+    let _id = mongo.ObjectId(qrCodeID);
+    const result = qrCodeModel.findOne({_id});
+    return result;
+}
 export const verifyEmail = async (emailEncoded) => {
     const email = new Buffer(emailEncoded, 'base64').toString('ascii');
     const data = await userModel.findOneAndUpdate({ email: email, active: false }, { $set: { active: true } });
@@ -72,7 +93,7 @@ export const verifyEmail = async (emailEncoded) => {
     return { status: "Actived" }
 }
 export const getUserInfoByID = async (userID) => {
-    let userInfo = await userModel.findOne({_id:userID});
-    if(userInfo) return userInfo;
+    let userInfo = await userModel.findOne({ _id: userID });
+    if (userInfo) return userInfo;
     throw new Error(ERROR);
 }

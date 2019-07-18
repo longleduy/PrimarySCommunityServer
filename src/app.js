@@ -11,7 +11,7 @@ app.use(urlencodedParser);
 app.use(redisServer);
 //app.set('trust proxy', 1);
 app.use(cors({
-    //origin: process.env.NODE_ENV !='production'?process.env.CLIENT_ORIGIN_DEV:process.env.CLIENT_ORIGIN_PROD,
+    origin: process.env.NODE_ENV !='production'?process.env.CLIENT_ORIGIN_DEV:process.env.CLIENT_ORIGIN_PROD,
     allowedHeaders:['X-Requested-With','X-HTTP-Method-Override','Content-Type','Accept','Authorization'],
     credentials:true,
     methods:['POST','GET']

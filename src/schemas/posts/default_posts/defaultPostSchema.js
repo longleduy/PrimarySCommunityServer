@@ -99,7 +99,7 @@ export const typeDefs = gql`
         comments: Int
     }
     extend type Query {
-        getListDefaultPost: [DefaultPost]
+        getListDefaultPost(lastPostID: String): [DefaultPost]
         getListCommentDefaultPost(getListCommentDefaultPostData: getListCommentDefaultPostData):[DefaultPostComment]
     }
     extend type Mutation {
@@ -116,8 +116,8 @@ export const typeDefs = gql`
 `;
 export const resolvers = {
     Query: {
-        getListDefaultPost: async (obj, args, context) => {
-            let result = await authorizationMiddleWare(context, getListDefaultPost);
+        getListDefaultPost: async (obj, {lastPostID}, context) => {
+            let result = await authorizationMiddleWare(context, getListDefaultPost,lastPostID);
             return result;
         },
         getListCommentDefaultPost: async (obj, { getListCommentDefaultPostData }, context) => {
