@@ -1,3 +1,3 @@
 let a ;
 let skip = a||7;
-console.log(skip);
+console.log(skip);dsds
