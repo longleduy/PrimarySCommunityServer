@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha  --timeout 10000 --require @babel/register ./test/.mocha.env ./test/main.js",
-    "start": "ENV NODE_ENV=development nodemon ./src/server.js --exec babel-node --host 192.168.1.103"
+    "start": "ENV NODE_ENV=development nodemon ./src/server.js --exec babel-node --host 192.168.1.17"
   },
   "repository": {
     "type": "git",
